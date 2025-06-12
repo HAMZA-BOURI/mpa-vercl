@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: garage_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: garage_billing
+      POSTGRES_USER: garage_user
+      POSTGRES_PASSWORD: garage_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - garage_network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: garage_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@garage.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    networks:
+      - garage_network
+
+volumes:
+  postgres_data:
+
+networks:
+  garage_network:
+    driver: bridge
